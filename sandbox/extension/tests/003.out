@@ -1,0 +1,4 @@
+Fatal error: Uncaught Error: Call to undefined function php_sandbox_test2() in /root/simpleIDS/filters/webshell/php/sandbox/php_sandbox/tests/003.php:2
+Stack trace:
+#0 {main}
+  thrown in /root/simpleIDS/filters/webshell/php/sandbox/php_sandbox/tests/003.php on line 2

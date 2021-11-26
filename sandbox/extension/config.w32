@@ -1,0 +1,7 @@
+ARG_ENABLE('php_sandbox', 'php_sandbox support', 'no');
+
+if (PHP_PHP_SANDBOX != 'no') {
+	AC_DEFINE('HAVE_PHP_SANDBOX', 1, 'php_sandbox support enabled');
+
+	EXTENSION('php_sandbox', 'php_sandbox.c', null, '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
+}

@@ -1,0 +1,6 @@
+001+ Fatal error: Uncaught Error: Call to undefined function php_sandbox_test1() in /root/simpleIDS/filters/webshell/php/sandbox/php_sandbox/tests/002.php:2
+002+ Stack trace:
+001- The extension php_sandbox is loaded and working!
+002- NULL
+003+ #0 {main}
+004+   thrown in /root/simpleIDS/filters/webshell/php/sandbox/php_sandbox/tests/002.php on line 2

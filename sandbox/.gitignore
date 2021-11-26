@@ -1,0 +1,7 @@
+*.o
+sandbox
+/rootfs
+
+/php/*
+!/php/rootfs
+php-*.tar.gz
