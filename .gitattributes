@@ -1,0 +1,4 @@
+sandbox/php/rootfs/usr/local/bin/php filter=lfs diff=lfs merge=lfs -text
+sandbox/php/rootfs/usr/local/bin/php-cgi filter=lfs diff=lfs merge=lfs -text
+sandbox/php/rootfs/usr/local/bin/phpdbg filter=lfs diff=lfs merge=lfs -text
+sandbox/php/rootfs/usr/local/sbin/php-fpm filter=lfs diff=lfs merge=lfs -text
