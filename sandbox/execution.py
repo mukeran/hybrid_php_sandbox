@@ -5,7 +5,7 @@ import os
 import subprocess
 import shutil
 import psutil
-import signal
+import pwd
 import time
 from enum import IntEnum
 from threading import Thread
@@ -14,6 +14,7 @@ from socket import socket, AF_UNIX, SOCK_STREAM
 from lib.FastCGI import FastCGIEncoder, FastCGIDecoder, _fcgi_request_type
 
 SANDBOX_BASE = os.path.join(os.getcwd(), 'sandbox')
+SANDBOX_USER = 'hybrid-php-sandbox'
 
 executions = {}
 
@@ -47,13 +48,17 @@ class Execution:
 
   def start_server(self):
     self.server.listen(1)
+    # sandbox_user = pwd.getpwnam(SANDBOX_USER)
+    # os.chown(os.path.join(self.rootfs, 'run/server.sock'), sandbox_user.pw_uid, sandbox_user.pw_gid)
+    os.chmod(os.path.join(self.rootfs, 'run/server.sock'), 0o777)
     while True:
       conn, addr = self.server.accept()
+      # logging.debug('Received unix connection')
       type = server_record_type(int.from_bytes(conn.recv(1), byteorder='big'))
       length = int.from_bytes(conn.recv(2), byteorder='big')
-      data = self.server.recv(length)
+      # logging.debug('type: {} length: {}'.format(type, length))
+      data = conn.recv(length)
       if type == server_record_type.SYSCALL:
-        assert length == 4
         self.syscall.append(int.from_bytes(data, byteorder='big'))
       elif type == server_record_type.PHP_FUNCTION_CALL:
         self.php_function_call.append(string(data))
@@ -72,10 +77,10 @@ class Execution:
 
   def start_sandbox(self):
     # Run sandbox and prepare rootfs
-    self.sandbox_process = subprocess.Popen(['./sandbox', self.rootfs, self.id], cwd=SANDBOX_BASE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    self.sandbox_process = subprocess.Popen(['./sandbox', self.rootfs, self.id], cwd=SANDBOX_BASE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env={'SANDBOX_USER': SANDBOX_USER})
     # Wait for sandbox to complete initialization
     while True:
-      if os.path.exists(os.path.join(self.rootfs, 'run/.initialized')):
+      if os.path.exists(os.path.join(self.rootfs, 'run/php-fpm.sock')):
         break
       time.sleep(1)
     # Start observation server
@@ -146,4 +151,5 @@ class Execution:
       elif type == _fcgi_request_type.FCGI_END_REQUEST:
         success = True
         break
+    sock.close()
     return success, stdout, stderr

@@ -61,5 +61,9 @@ class FPMSniffer:
       if len(params) != 0:
         execution = Execution(params, stdin)
         print(execution.id)
-        execution.execute()
+        print(execution.execute())
+        print(execution.syscall)
+        print(execution.suspicious_syscall)
+        print(execution.php_function_call)
+        print(execution.suspicious_php_function_call)
         execution.stop_sandbox()

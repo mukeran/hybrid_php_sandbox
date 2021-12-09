@@ -88,14 +88,17 @@ class FastCGIEncoder:
     packet = b''
     while True:
       packet += version.to_bytes(1, 'big') + type.to_bytes(1, 'big') + request_id.to_bytes(2, 'big')
-      if len(content) > 65535:
-        current_content = content[:65535]
-        content = content[65535:]
+      if len(content) > 0xffff:
+        current_content = content[:0xffff]
+        content = content[0xffff:]
       else:
         current_content = content
         content = b''
-      packet += len(current_content).to_bytes(2, 'big') + b'\x00\x00'
-      packet += current_content
+      padding_len = (8 - (len(current_content) % 8)) % 8
+      packet += len(current_content).to_bytes(2, 'big') + padding_len.to_bytes(1, 'big') + b'\x00'
+      packet += current_content + padding_len * b'\x00'
       if len(content) == 0:
         break
+    if type == _fcgi_request_type.FCGI_PARAMS or type == _fcgi_request_type.FCGI_STDIN:
+      packet += version.to_bytes(1, 'big') + type.to_bytes(1, 'big') + request_id.to_bytes(2, 'big') + b'\x00\x00\x00\x00'
     return packet

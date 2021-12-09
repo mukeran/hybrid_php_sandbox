@@ -4,7 +4,6 @@
 #include <sys/types.h>
 
 void setup_trace();
-void trace_loop();
-void agent_loop(pid_t pid);
+void trace_loop(pid_t pid);
 
 #endif

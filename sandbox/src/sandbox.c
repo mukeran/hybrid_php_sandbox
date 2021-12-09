@@ -37,6 +37,12 @@ char *container_execv_args[] = {
     NULL
 };
 
+char *php_fpm_execv_args[] = {
+    "/usr/local/sbin/php-fpm",
+    "--allow-to-run-as-root",
+    "--nodaemonize"
+};
+
 char *debug_container_execv_args[] = {
     "/bin/bash",
     NULL
@@ -56,15 +62,6 @@ int container_main() {
     /** Register SIGSEGV handler */
     signal(SIGSEGV, handle_SIGSEGV);
     close(on_user_mapped[1]);
-    /** Wait for sandbox_user mapped inside */
-    char _useless;
-    read(on_user_mapped[0], &_useless, 1);
-    if (setgid(0) != 0) {
-        fprintf(stderr, "Failed to setgid to %d\n", 0);
-    }
-    if (setuid(0) != 0) {
-        fprintf(stderr, "Failed to setuid to %d\n", 0);
-    }
     /** Change root */
     if (chdir(rootfs_path) != 0 || chroot("./") != 0){
         perror("Failed to chroot");
@@ -85,7 +82,6 @@ int container_main() {
     /** Setup ptrace */
 #ifndef NOTRACE
     pid_t pid = fork();
-    pid_t pid_agent;
     switch (pid) {
     case -1:
         fprintf(stderr, "Failed to fork");
@@ -93,31 +89,25 @@ int container_main() {
     case 0:
         setup_trace();
 #endif
+        /** Wait for sandbox_user mapped inside */
+        char _useless;
+        read(on_user_mapped[0], &_useless, 1);
+        if (setgid(0) != 0) {
+            fprintf(stderr, "Failed to setgid to %d\n", 0);
+        }
+        if (setuid(0) != 0) {
+            fprintf(stderr, "Failed to setuid to %d\n", 0);
+        }
         /** Start php-fpm */
-        system("php-fpm --allow-to-run-as-root");
-        printf("Hybrid PHP Sandbox is running...\n");
-        system("touch /run/.initialized");
-#ifdef DEBUG
-        /** Run bash */
-        execv(debug_container_execv_args[0], debug_container_execv_args);
-#else
-        /** Run tail -f */
-        execv(container_execv_args[0], container_execv_args);
-#endif
+        execv(php_fpm_execv_args[0], php_fpm_execv_args);
+        // execv(debug_container_execv_args[0], debug_container_execv_args);
 #ifndef NOTRACE
     default:
-        // sleep(1);
-        pid_agent = fork();
-        switch (pid_agent) {
-        case -1:
-            fprintf(stderr, "Failed to fork");
-        case 0:
-            agent_loop(pid);
-            break;
-        default:
-            trace_loop();
-            break;
-        }
+#ifdef DEBUG
+        printf("Tracer PID: %d\n", getpid());
+        printf("Tracee PID: %d\n", pid);
+#endif
+        trace_loop(pid);
         break;
     }
 #endif
@@ -204,6 +194,7 @@ int main(int argc, char *argv[]) {
         container_cwd = malloc(sizeof(char) * PATH_MAX);
         memcpy(container_cwd, "/", 2);
     } else {
+        value = strdup(value);
         int len = strlen(value);
         container_cwd = malloc(sizeof(char) * (len + 1));
         memcpy(container_cwd, value, sizeof(char) * (len + 1));
@@ -216,6 +207,7 @@ int main(int argc, char *argv[]) {
         value = (char *)malloc(19);
         memcpy(value, "hybrid-php-sandbox", 19);
     }
+    value = strdup(value);
     sandbox_user = getpwnam(value);
     if (sandbox_user == NULL) {
         fprintf(stderr, "Invalid sandbox user %s, please run make setup-user to create a sandbox user or check environment variable SANDBOX_USER\n", value);

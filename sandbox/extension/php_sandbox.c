@@ -202,33 +202,33 @@ PHP_MINFO_FUNCTION(php_sandbox)
 PHP_MINIT_FUNCTION(php_sandbox)
 {
 	/** Hook functions */
-    for (int i = 0; i < hook_function_count; ++i) {
-        zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
-        if (func) {
-            original_functions[i] = func->handler;
-            func->handler = hook_functions[i];
-        }
-    }
+    // for (int i = 0; i < hook_function_count; ++i) {
+    //     zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
+    //     if (func) {
+    //         original_functions[i] = func->handler;
+    //         func->handler = hook_functions[i];
+    //     }
+    // }
     /** Hook FFI */
-    zend_class_entry *class = zend_hash_str_find_ptr(CG(class_table), "ffi", 3);
-    if (class) {
-        zend_internal_function *func = zend_hash_str_find_ptr(&(class->function_table), "cdef", 4);
-        if (func) {
-            original_cdef_function = func->handler;
-            func->handler = zif_hooked_cdef;
-        }
-    }
+    // zend_class_entry *class = zend_hash_str_find_ptr(CG(class_table), "ffi", 3);
+    // if (class) {
+    //     zend_internal_function *func = zend_hash_str_find_ptr(&(class->function_table), "cdef", 4);
+    //     if (func) {
+    //         original_cdef_function = func->handler;
+    //         func->handler = zif_hooked_cdef;
+    //     }
+    // }
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(php_sandbox)
 {
-	for (int i = 0; i < hook_function_count; ++i) {
-        zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
-        if (func) {
-            func->handler = original_functions[i];
-        }
-    }
+	// for (int i = 0; i < hook_function_count; ++i) {
+    //     zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
+    //     if (func) {
+    //         func->handler = original_functions[i];
+    //     }
+    // }
 	return SUCCESS;
 }
 
