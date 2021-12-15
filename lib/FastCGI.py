@@ -102,3 +102,45 @@ class FastCGIEncoder:
     if type == _fcgi_request_type.FCGI_PARAMS or type == _fcgi_request_type.FCGI_STDIN:
       packet += version.to_bytes(1, 'big') + type.to_bytes(1, 'big') + request_id.to_bytes(2, 'big') + b'\x00\x00\x00\x00'
     return packet
+  
+  @staticmethod
+  def from_http(http_request: bytes):
+    body_seperator = http_request.find(b'\r\n\r\n')
+    header_lines = http_request[:body_seperator].split(b'\r\n')
+    body = http_request[body_seperator+4:]
+    first_line_split = header_lines[0].split(b' ')
+    method = first_line_split[0]
+    query = b'?'.join(first_line_split[1].split(b'?')[1:])
+    uri = first_line_split[1].split(b'?')[0].replace(b'{script_path}', b'/')
+    headers = {}
+    for header_line in header_lines[1:]:
+      split = header_line.split(b':')
+      key = split[0].strip()
+      value = b':'.join(split[1:]).strip()
+      headers[key.decode().lower()] = value
+    params = {
+      'PATH_INFO': '',
+      'SCRIPT_FILENAME': '/var/www/html/index.php',
+      'QUERY_STRING': query.decode(),
+      'REQUEST_METHOD': method.decode(),
+      'CONTENT_TYPE': headers['content-type'].decode() if 'content-type' in headers else '',
+      'CONTENT_LENGTH': '' if method == b'GET' else headers['content-length'].decode(),
+      'SCRIPT_NAME': '/index.php',
+      'REQUEST_URI': uri.decode(),
+      'DOCUMENT_URI': '/index.php',
+      'DOCUMENT_ROOT': '/var/www/html',
+      'SERVER_PROTOCOL': 'HTTP/1.1',
+      'REQUEST_SCHEME': 'http',
+      'GATEWAY_INTERFACE': 'CGI/1.1',
+      'SERVER_SOFTWARE': 'nginx/1.18.0',
+      'REMOTE_ADDR': '10.104.252.238',
+      'REMOTE_PORT': '50001',
+      'SERVER_ADDR': '10.104.252.122',
+      'SERVER_PORT': '80',
+      'SERVER_NAME': 'sandbox.local',
+      'REDIRECT_STATUS': '200'
+    }
+    for key in headers.keys():
+      key: str
+      params['HTTP_'+key.replace('-', '_').upper()] = headers[key].decode()
+    return params, body

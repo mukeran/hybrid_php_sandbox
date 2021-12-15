@@ -1,0 +1,3 @@
+GET {script_path}?cmd=id HTTP/1.1
+Connection: close
+

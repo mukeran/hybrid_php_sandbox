@@ -155,14 +155,7 @@ void free_report(struct report *report) {
 }
 
 int send_to_server(struct report *report) {
-#ifdef DEBUG
-    FILE *fp = fopen("/run/server.log", "a+");
-    fprintf(fp, "access: %d\n", access("/run/server.sock", F_OK));
-#endif
     if (access("/run/server.sock", F_OK) == -1) {
-#ifdef DEBUG
-        fclose(fp);
-#endif
         return -1;
     }
     int sock = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -170,16 +163,9 @@ int send_to_server(struct report *report) {
     addr.sun_family = AF_UNIX;
     memcpy(addr.sun_path, "/run/server.sock", 17);
     if (connect(sock, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-#ifdef DEBUG
-        fprintf(fp, "Failed to connect to server.sock\n");
-        fclose(fp);
-#endif
         fprintf(stderr, "Failed to connect to server.sock\n");
         return -1;
     }
-#ifdef DEBUG
-    fclose(fp);
-#endif
     int n = send(sock, report->data, report->length, 0);
     close(sock);
     return n;

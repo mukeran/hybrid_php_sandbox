@@ -1,0 +1,189 @@
+{
+    "requests": [
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "antsword_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "antsword_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "antsword_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_exec_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_exec_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_exec_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_passthru_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_passthru_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_passthru_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_popen_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_popen_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_popen_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_proc_open_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_proc_open_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_proc_open_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_shell_exec_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_shell_exec_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_shell_exec_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_system_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_system_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "eval_post_a.php",
+            "request_file": "eval_system_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "behinder_v3.0_shell.php",
+            "request_file": "behinder_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "behinder_v3.0_shell.php",
+            "request_file": "behinder_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "behinder_v3.0_shell.php",
+            "request_file": "behinder_phpinfo.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "behinder_v3.0_shell.php",
+            "request_file": "behinder_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_eval_xor_base64.php",
+            "request_file": "godzilla_info.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_eval_xor_base64.php",
+            "request_file": "godzilla_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_eval_xor_base64.php",
+            "request_file": "godzilla_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_eval_xor_base64.php",
+            "request_file": "godzilla_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_base64.php",
+            "request_file": "godzilla_xor_base64_info.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_base64.php",
+            "request_file": "godzilla_xor_base64_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_base64.php",
+            "request_file": "godzilla_xor_base64_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_base64.php",
+            "request_file": "godzilla_xor_base64_uname.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_raw.php",
+            "request_file": "godzilla_xor_raw_info.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_raw.php",
+            "request_file": "godzilla_xor_raw_id.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_raw.php",
+            "request_file": "godzilla_xor_raw_ls.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "godzilla_php_xor_raw.php",
+            "request_file": "godzilla_xor_raw_uname.http",
+            "keep_filename": false
+        }
+    ]
+}

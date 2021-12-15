@@ -1,0 +1,9 @@
+{
+    "requests": [
+        {
+            "php_file": "ini_set.php",
+            "request_file": "ini_set.http",
+            "keep_filename": false
+        }
+    ]
+}

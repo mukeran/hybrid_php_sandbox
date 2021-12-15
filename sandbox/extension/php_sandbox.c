@@ -8,8 +8,6 @@
 #include "ext/standard/info.h"
 #include "php_php_sandbox.h"
 #include "SAPI.h"
-#include <arpa/inet.h>
-#include <sys/socket.h>
 
 #include "util.h"
 
@@ -21,37 +19,17 @@
 #endif
 
 #define hook_function_count 7
-char *hook_function_names[] = {"system", "exec", "passthru", "shell_exec", "pcntl_exec", "popen", "mail"};
+char *hook_function_names[] = {"system", "exec", "passthru", "shell_exec", "pcntl_exec", "popen", "putenv"};
 zif_handler original_functions[hook_function_count];
 zif_handler original_cdef_function;
 
-void inform_detected(const char *info) {
-    if (PG(auto_globals_jit)) {
-        zend_is_auto_global_str(ZEND_STRL("_SERVER"));
-    }
-    zval *_server = zend_hash_str_find(&EG(symbol_table), "_SERVER", sizeof("_SERVER") - 1);
-    zval *_request_id = zend_hash_str_find(Z_ARRVAL_P(_server), "REQUEST_ID", sizeof("REQUEST_ID") - 1);
-    if (_request_id == NULL)
-        return;
-    char *request_id = Z_STRVAL_P(_request_id);
-    int listen_port = 9001;
-    char *listen_port_env = getenv("PROXY_LISTEN_PORT");
-    if (listen_port_env != NULL)
-        sscanf(listen_port_env, "%d", &listen_port);
-
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    addr.sin_port = htons(listen_port);
-    connect(sockfd, (struct sockaddr*)&addr, sizeof(addr));
-    char content[1024];
-    char *urlencoded_info = urlencode(info);
-    sprintf(content, "GET /%s?info=%s HTTP/1.1\r\n\r\n", request_id, urlencoded_info);
-    free(urlencoded_info);
-    write(sockfd, content, strlen(content));
-    close(sockfd);
+zif_handler get_original_function(const char *function_name) {
+	if (function_name == "FFI::cdef")
+		return original_cdef_function;
+	for (int i = 0; i < hook_function_count; ++i)
+		if (strcmp(hook_function_names[i], function_name) == 0)
+			return original_functions[i];
+	return NULL;
 }
 
 PHP_FUNCTION(hooked_system)
@@ -62,11 +40,10 @@ PHP_FUNCTION(hooked_system)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED system!");
-    char buf[2048];
-    sprintf(buf, "system, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+	struct report *report = build_php_suspicious_function_call_report("system", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("system"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_exec)
@@ -77,11 +54,10 @@ PHP_FUNCTION(hooked_exec)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED exec!");
-    char buf[2048];
-    sprintf(buf, "exec, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+	struct report *report = build_php_suspicious_function_call_report("exec", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("exec"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_passthru)
@@ -92,11 +68,10 @@ PHP_FUNCTION(hooked_passthru)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED passthru!");
-    char buf[2048];
-    sprintf(buf, "passthru, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+    struct report *report = build_php_suspicious_function_call_report("passthru", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("passthru"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_shell_exec)
@@ -107,11 +82,10 @@ PHP_FUNCTION(hooked_shell_exec)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED shell_exec!");
-    char buf[2048];
-    sprintf(buf, "shell_exec, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+	struct report *report = build_php_suspicious_function_call_report("shell_exec", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("shell_exec"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_pcntl_exec)
@@ -122,11 +96,10 @@ PHP_FUNCTION(hooked_pcntl_exec)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED pcntl_exec!");
-    char buf[2048];
-    sprintf(buf, "pcntl_exec, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+	struct report *report = build_php_suspicious_function_call_report("pcntl_exec", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("pcntl_exec"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_popen)
@@ -137,28 +110,26 @@ PHP_FUNCTION(hooked_popen)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
 	char *command = Z_STRVAL(args[0]);
-	php_printf("BLOCKED popen!");
-    char buf[2048];
-    sprintf(buf, "popen, command: %s", command);
-    inform_detected(buf);
-	RETURN_STRING("BLOCKED!")
+	struct report *report = build_php_suspicious_function_call_report("popen", command, strlen(command));
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("popen"))(execute_data, return_value);
 }
 
-PHP_FUNCTION(hooked_mail)
+PHP_FUNCTION(hooked_putenv)
 {
     zval *args = NULL;
 	int argc = ZEND_NUM_ARGS();
 	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
-    if (argc >= 4) {
-        char buf[2048];
-        sprintf(buf, "mail, argc >= 4");
-        inform_detected(buf);
-	    RETURN_STRING("BLOCKED!")
-    } else {
-        original_functions[6](execute_data, return_value);
-    }
+	char *settings = Z_STRVAL(args[0]);
+	if (strstr(settings, "LD_PRELOAD")) {
+		struct report *report = build_php_suspicious_function_call_report("putenv", settings, strlen(settings));
+		send_to_server(report);
+		free_report(report);
+	}
+	(get_original_function("putenv"))(execute_data, return_value);
 }
 
 PHP_FUNCTION(hooked_cdef)
@@ -169,13 +140,17 @@ PHP_FUNCTION(hooked_cdef)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
     char *func = Z_STRVAL(args[0]);
-    char buf[2048];
-    sprintf(buf, "FFI::cdef, func: %s", func);
-    inform_detected(buf);
-    RETURN_STRING("BLOCKED!")
+	char *so = Z_STRVAL(args[1]);
+	char *buf = (char *)malloc(strlen(func) + strlen(so) + 1);
+	int length = sprintf(buf, "%s|%s", func, so);
+	struct report *report = build_php_suspicious_function_call_report("FFI::cdef", buf, length);
+	free(buf);
+	send_to_server(report);
+	free_report(report);
+	(get_original_function("FFI::cdef"))(execute_data, return_value);
 }
 
-zif_handler hook_functions[] = {zif_hooked_system, zif_hooked_exec, zif_hooked_passthru, zif_hooked_shell_exec, zif_hooked_pcntl_exec, zif_hooked_popen, zif_hooked_mail};
+zif_handler hook_functions[] = {zif_hooked_system, zif_hooked_exec, zif_hooked_passthru, zif_hooked_shell_exec, zif_hooked_pcntl_exec, zif_hooked_popen, zif_hooked_putenv};
 
 /* {{{ PHP_RINIT_FUNCTION
  */
@@ -194,41 +169,86 @@ PHP_RINIT_FUNCTION(php_sandbox)
 PHP_MINFO_FUNCTION(php_sandbox)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "php_sandbox support", "enabled");
+	// php_info_print_table_header(2, "php_sandbox support", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */
 
+static int hook_handler(zend_execute_data *execute_data) {
+	if (execute_data->call == NULL || execute_data->call->func == NULL)
+		return ZEND_USER_OPCODE_DISPATCH;
+	if (execute_data->call->func->type != ZEND_INTERNAL_FUNCTION)
+		return ZEND_USER_OPCODE_DISPATCH;
+	zend_function *func = execute_data->call->func;
+	zend_string *function_name = func->common.function_name;
+	char *name;
+	if (func->common.scope != NULL) {
+		zend_string *class_name = func->common.scope->name;
+		int function_name_length = ZSTR_LEN(function_name);
+		int class_name_length = ZSTR_LEN(class_name);
+		int length = function_name_length + class_name_length + 2 + 1;
+		name = (char *)malloc(length);
+		memcpy(name, ZSTR_VAL(class_name), class_name_length);
+		memcpy(name + class_name_length, "::", 2);
+		memcpy(name + class_name_length + 2, ZSTR_VAL(function_name), function_name_length);
+		name[class_name_length + function_name_length + 2] = '\0';
+	} else {
+		int length = ZSTR_LEN(function_name) + 1;
+		name = (char *)malloc(length);
+		memcpy(name, ZSTR_VAL(function_name), length);
+	}
+	struct report *report = build_php_function_call_report(name);
+	free(name);
+	send_to_server(report);
+	free_report(report);
+	return ZEND_USER_OPCODE_DISPATCH;
+}
+
 PHP_MINIT_FUNCTION(php_sandbox)
 {
+	zend_set_user_opcode_handler(ZEND_DO_FCALL, hook_handler);
+	zend_set_user_opcode_handler(ZEND_DO_ICALL, hook_handler);
+	zend_set_user_opcode_handler(ZEND_DO_UCALL, hook_handler);
+	zend_set_user_opcode_handler(ZEND_DO_FCALL_BY_NAME, hook_handler);
 	/** Hook functions */
-    // for (int i = 0; i < hook_function_count; ++i) {
-    //     zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
-    //     if (func) {
-    //         original_functions[i] = func->handler;
-    //         func->handler = hook_functions[i];
-    //     }
-    // }
+    for (int i = 0; i < hook_function_count; ++i) {
+        zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
+        if (func) {
+            original_functions[i] = func->handler;
+            func->handler = hook_functions[i];
+        }
+    }
     /** Hook FFI */
-    // zend_class_entry *class = zend_hash_str_find_ptr(CG(class_table), "ffi", 3);
-    // if (class) {
-    //     zend_internal_function *func = zend_hash_str_find_ptr(&(class->function_table), "cdef", 4);
-    //     if (func) {
-    //         original_cdef_function = func->handler;
-    //         func->handler = zif_hooked_cdef;
-    //     }
-    // }
+    zend_class_entry *class = zend_hash_str_find_ptr(CG(class_table), "ffi", 3);
+    if (class) {
+        zend_internal_function *func = zend_hash_str_find_ptr(&(class->function_table), "cdef", 4);
+        if (func) {
+            original_cdef_function = func->handler;
+            func->handler = zif_hooked_cdef;
+        }
+    }
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(php_sandbox)
 {
-	// for (int i = 0; i < hook_function_count; ++i) {
-    //     zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
-    //     if (func) {
-    //         func->handler = original_functions[i];
-    //     }
-    // }
+	zend_set_user_opcode_handler(ZEND_DO_FCALL, NULL);
+	zend_set_user_opcode_handler(ZEND_DO_ICALL, NULL);
+	zend_set_user_opcode_handler(ZEND_DO_UCALL, NULL);
+	zend_set_user_opcode_handler(ZEND_DO_FCALL_BY_NAME, NULL);
+	/** Restore functions */
+	for (int i = 0; i < hook_function_count; ++i) {
+        zend_internal_function *func = zend_hash_str_find_ptr(CG(function_table), hook_function_names[i], strlen(hook_function_names[i]));
+        if (func)
+            func->handler = original_functions[i];
+    }
+	/** Restore FFI */
+	zend_class_entry *class = zend_hash_str_find_ptr(CG(class_table), "ffi", 3);
+    if (class) {
+        zend_internal_function *func = zend_hash_str_find_ptr(&(class->function_table), "cdef", 4);
+        if (func)
+            func->handler = original_cdef_function;
+    }
 	return SUCCESS;
 }
 

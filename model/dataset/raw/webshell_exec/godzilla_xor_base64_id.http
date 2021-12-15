@@ -1,0 +1,11 @@
+POST / HTTP/1.1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0
+Cookie: PHPSESSID=j6d87fqon2msgd3bkn6q6m1csp;
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2
+Host: sandbox.local
+Connection: keep-alive
+Content-type: application/x-www-form-urlencoded
+Content-Length: 165
+
+pass=fL1tMGI4YTljzjj%2Bgz7hE3M2NUGPH6WYTr9vKLCit9t09Nkz5xbCqpfCXk0O%2B9n16MLNpPBYW1bPdlbTRzv1YUNSW3FA50bUgR8JYN8GKDVYc9FW%2BuP%2FEOS1rlHg%2Bd5jRolB1n1H39t4HWgyMjQ%3D

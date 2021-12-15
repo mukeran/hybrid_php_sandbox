@@ -1,0 +1,17 @@
+{
+    "requests": [
+        {
+            "php_file": "putenv_mail_with_writing_so.php",
+            "request_file": "putenv_mail_with_writing_so.http",
+            "keep_filename": false
+        },
+        {
+            "php_file": "putenv_mail_without_writing_so.php",
+            "request_file": "putenv_mail_without_writing_so.http",
+            "keep_filename": false,
+            "copy_files": {
+                "exp.so": "/tmp/exp.so"
+            }
+        }
+    ]
+}
