@@ -1,9 +1,7 @@
 import argparse
-import logging
+import importlib
 
-import sniffer
-import model.dataset.raw
-import model.train
+from lib.logger import init
 
 parser = argparse.ArgumentParser(description='A hybrid php runtime sandbox by Keran Mu for Enterprise Engineering Practice course.')
 parser.add_argument('--process_raw', action='store_true', help='Process raw data')
@@ -13,24 +11,11 @@ parser.add_argument('--debug', action='store_true', help='Enable debug mode')
 
 STRUCTURED_DATA_PATH = 'model/dataset/structured/data.sqlite3'
 
-def start_sniffing():
-  logging.info('Starting...')
-  fpm_sniffer = sniffer.FPMSniffer()
-  fpm_sniffer.start()
-  logging.info("Initialized")
-  fpm_sniffer.join()
-
 def dispatch():
   args = parser.parse_args()
-  if args.debug:
-    logging.getLogger().setLevel(logging.DEBUG)
-  else:
-    logging.getLogger().setLevel(logging.INFO)
+  init(args.debug)
   if args.process_raw:
-    model.dataset.raw.init_database(STRUCTURED_DATA_PATH, args.overwrite)
-    model.dataset.raw.process()
-    exit(0)
+    importlib.import_module('cli.process_raw').process_raw(STRUCTURED_DATA_PATH, args.overwrite)
   if args.train:
-    model.train.run(STRUCTURED_DATA_PATH)
-    exit(0)
-  start_sniffing()
+    importlib.import_module('cli.train').train(STRUCTURED_DATA_PATH)
+  importlib.import_module('cli.start_sniffing').start_sniffing()

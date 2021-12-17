@@ -1,11 +1,12 @@
-import logging
 import threading
 import os
 from enum import Enum
 from scapy.all import sniff, TCP
 
 from lib.FastCGI import FastCGIDecoder, _fcgi_request_type
+from lib.logger import logger, logging
 from sandbox import Execution
+from judge import judge
 
 PROXY_URL = 'http://127.0.0.1:9001'
 
@@ -43,7 +44,7 @@ class FPMSniffer:
       kwargs={ "iface": self.iface, "prn": self.parse, "filter": "tcp and port {}".format(self.port) }
     )
     self.t.start()
-    logging.info('FPMSniffer started')
+    logger.info('FPMSniffer started')
 
   def join(self):
     self.t.join()
@@ -66,11 +67,14 @@ class FPMSniffer:
           stdin += packet['content']
       if len(params) != 0:
         execution = Execution(params, stdin)
-        print(execution.id)
-        print(execution.execute())
-        print(execution.syscall)
-        print(execution.suspicious_syscall)
-        print(execution.php_function_call)
-        print(execution.suspicious_php_function_call)
+        logger.info('New execution: {}, PHP File Path: {}'.format(execution.id, params['SCRIPT_FILENAME']))
+        success, stdout, stderr = execution.execute()
+        logger.debug('Execution result: {}, {}, {}'.format(success, stdout, stderr))
+        logger.debug('Syscall: {}'.format(execution.syscall))
+        logger.debug('Suspicious Syscall: {}'.format(execution.suspicious_syscall))
+        logger.debug('PHP Function Call: {}'.format(execution.php_function_call))
+        logger.debug('Suspicious PHP Function Call: {}'.format(execution.suspicious_php_function_call))
         execution.stop_sandbox()
         execution.stop_server()
+        category, reason = judge(execution.syscall, execution.suspicious_syscall, execution.php_function_call, execution.suspicious_php_function_call)
+        logger.log(logging.INFO if category == 'normal' else logging.WARNING, 'Judge result: {}, reason: {}'.format(category, reason))

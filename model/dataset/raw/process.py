@@ -1,12 +1,12 @@
 import os
 import json
-import logging
 import sqlite3
 import hashlib
 import time
 import json
 
 from lib.FastCGI import FastCGIEncoder
+from lib.logger import logger
 from sandbox import Execution
 
 overwrite = False
@@ -69,12 +69,12 @@ def process():
       if 'copy_file' in request:
         for file in request['copy_file'].keys():
           copy_file[os.path.join(raw_path, category, file)] = request['copy_file'][file]
-      logging.info('Executing {}/{}, id: {}'.format(category, request['request_file'], execution.id))
+      logger.info('Executing {}/{}, id: {}'.format(category, request['request_file'], execution.id))
       success, stdout, stderr = execution.execute(copy_file=copy_file)
-      logging.debug('syscall: {}'.format(execution.syscall))
-      logging.debug('php_function_call: {}'.format(execution.php_function_call))
-      logging.debug('suspicious_syscall: {}'.format(execution.suspicious_syscall))
-      logging.debug('suspicious_php_function_call: {}'.format(execution.suspicious_php_function_call))
+      logger.debug('syscall: {}'.format(execution.syscall))
+      logger.debug('php_function_call: {}'.format(execution.php_function_call))
+      logger.debug('suspicious_syscall: {}'.format(execution.suspicious_syscall))
+      logger.debug('suspicious_php_function_call: {}'.format(execution.suspicious_php_function_call))
       execution.stop_sandbox()
       execution.stop_server()
       cur.execute('''insert into data

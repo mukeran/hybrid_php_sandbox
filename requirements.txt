@@ -1,0 +1,5 @@
+scapy
+psutil
+tensorflow
+pandas
+coloredlogs

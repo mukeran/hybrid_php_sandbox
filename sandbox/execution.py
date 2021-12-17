@@ -1,4 +1,3 @@
-import logging
 import random
 import string
 import os
@@ -11,7 +10,9 @@ from enum import IntEnum
 from threading import Thread
 from typing import List, Tuple
 from socket import socket, timeout, AF_UNIX, SOCK_STREAM
+
 from lib.FastCGI import FastCGIEncoder, FastCGIDecoder, _fcgi_request_type
+from lib.logger import logger
 
 SANDBOX_BASE = os.path.join(os.getcwd(), 'sandbox')
 SANDBOX_USER = 'hybrid-php-sandbox'
@@ -63,10 +64,10 @@ class Execution:
         continue
       except:
         break
-      # logging.debug('Received unix connection')
+      logger.debug('Received unix connection')
       type = server_record_type(int.from_bytes(conn.recv(1), byteorder='big'))
       length = int.from_bytes(conn.recv(2), byteorder='big')
-      # logging.debug('type: {} length: {}'.format(type, length))
+      logger.debug('type: {} length: {}'.format(type, length))
       data = conn.recv(length)
       if type == server_record_type.SYSCALL:
         self.syscall.append(int.from_bytes(data, byteorder='big'))
@@ -105,7 +106,7 @@ class Execution:
     except FileExistsError:
       pass
     except Exception:
-      logging.error('Failed to mkdir {}'.format(save_path))
+      logger.error('Failed to mkdir {}'.format(save_path))
       return False
     if not self.copy_script_path is None:
       shutil.copyfile(self.copy_script_path, save_path)
@@ -139,7 +140,7 @@ class Execution:
         except FileExistsError:
           pass
         except Exception:
-          logging.error('Failed to mkdir {}'.format(save_path))
+          logger.error('Failed to mkdir {}'.format(save_path))
           return False
         shutil.copyfile(file, save_path)
     # Connect to sandbox
